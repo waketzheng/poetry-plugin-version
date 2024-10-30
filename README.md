@@ -1,4 +1,8 @@
 # Poetry Plugin Version
+![Python Versions](https://img.shields.io/pypi/pyversions/poetry-plugin-version)
+[![LatestVersionInPypi](https://img.shields.io/pypi/v/poetry-plugin-version.svg?color=%2334D058&label=pypi%20package&style=flat)](https://pypi.python.org/pypi/poetry-plugin-version)
+![Mypy coverage](https://img.shields.io/badge/mypy-100%25-green.svg)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
 that fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
@@ -63,7 +67,8 @@ Building my-awesome-package (0.1.9)
 * 🐛 Fix run in deep subdir error. ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
 
 <details>
-<summary>Origin README</summary>
+<summary>Upstream README</summary>
+
 ## 🚨 WARNING: DEPRECATED 🚨
 
 This project is deprecated. You should not use it. And if you use it for existing libraries, you should migrate to other projects.
