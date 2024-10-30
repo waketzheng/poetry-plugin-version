@@ -5,7 +5,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
-that fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
+and fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
 
 A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
 
