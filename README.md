@@ -1,6 +1,7 @@
 # Poetry Plugin Version
 
 > This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
+that fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
 
 A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
 
@@ -59,6 +60,7 @@ Building my-awesome-package (0.1.9)
 ### 0.2.2
 
 * 🔧 Migrate lint tool from autoflake/black/isort to ruff.
+* 🐛 Fix run in deep subdir error. ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
 
 <details>
 <summary>Origin README</summary>

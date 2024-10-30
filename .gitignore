@@ -8,3 +8,4 @@ htmlcov
 coverage.xml
 .vscode
 .idea
+.dmypy.json

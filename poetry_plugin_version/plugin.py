@@ -11,18 +11,18 @@ from poetry.poetry import Poetry
 
 class VersionPlugin(Plugin):
     def activate(self, poetry: Poetry, io: IO) -> None:
+        name = "poetry-plugin-version"
         poetry_version_config: Optional[Dict[str, Any]] = poetry.pyproject.data.get(
             "tool", {}
-        ).get("poetry-plugin-version")
+        ).get(name)
         if poetry_version_config is None:
             return
-        version_source = poetry_version_config.get("source")
-        if not version_source:
+        if not (version_source := poetry_version_config.get("source")):
             message = (
-                "<b>poetry-plugin-version</b>: No <b>source</b> configuration found in "
-                "[tool.poetry-plugin-version] in pyproject.toml, not extracting "
+                "<b>{0}</b>: No <b>source</b> configuration found in "
+                "[tool.{0}] in pyproject.toml, not extracting "
                 "dynamic version"
-            )
+            ).format(name)
             io.write_error_line(message)
             raise RuntimeError(message)
         if version_source == "init":
@@ -32,50 +32,50 @@ class VersionPlugin(Plugin):
                     package_name = packages[0]["include"]
                 else:
                     message = (
-                        "<b>poetry-plugin-version</b>: More than one package set, "
+                        f"<b>{name}</b>: More than one package set, "
                         "cannot extract dynamic version"
                     )
                     io.write_error_line(message)
                     raise RuntimeError(message)
             else:
                 package_name = module_name(poetry.package.name)
-            if not (init_path := Path(package_name) / "__init__.py").is_file():
+            if not (init_path := Path(package_name) / "__init__.py").is_file() and (
+                not (init_path := poetry.file.path.parent / init_path).is_file()
+            ):
                 message = (
-                    "<b>poetry-plugin-version</b>: __init__.py file not found at "
+                    f"<b>{name}</b>: __init__.py file not found at "
                     f"{init_path} cannot extract dynamic version"
                 )
                 io.write_error_line(message)
                 raise RuntimeError(message)
             io.write_line(
-                "<b>poetry-plugin-version</b>: Using __init__.py file at "
+                f"<b>{name}</b>: Using __init__.py file at "
                 f"{init_path} for dynamic version"
             )
             tree = ast.parse(init_path.read_text())
             for el in tree.body:
-                if isinstance(el, ast.Assign):
-                    if len(el.targets) == 1:
-                        target = el.targets[0]
-                        if isinstance(target, ast.Name):
-                            if target.id == "__version__":
-                                value_node = el.value
-                                if isinstance(value_node, ast.Constant):
-                                    version = value_node.value
-                                elif isinstance(value_node, ast.Str):
-                                    version = value_node.s
-                                else:  # pragma: nocover
-                                    # This is actually covered by tests, but can't be
-                                    # reported by Coverage
-                                    # Ref: https://github.com/nedbat/coveragepy/issues/198
-                                    continue
-                                io.write_line(
-                                    "<b>poetry-plugin-version</b>: Setting package "
-                                    "dynamic version to __version__ "
-                                    f"variable from __init__.py: <b>{version}</b>"
-                                )
-                                poetry.package._set_version(version)
-                                return
+                if isinstance(el, ast.Assign) and len(el.targets) == 1:
+                    target = el.targets[0]
+                    if isinstance(target, ast.Name) and target.id == "__version__":
+                        value_node = el.value
+                        if isinstance(value_node, ast.Constant):
+                            version = value_node.value
+                        elif isinstance(value_node, ast.Str):
+                            version = value_node.s
+                        else:  # pragma: nocover
+                            # This is actually covered by tests, but can't be
+                            # reported by Coverage
+                            # Ref: https://github.com/nedbat/coveragepy/issues/198
+                            continue
+                        io.write_line(
+                            f"<b>{name}</b>: Setting package "
+                            "dynamic version to __version__ "
+                            f"variable from __init__.py: <b>{version}</b>"
+                        )
+                        poetry.package._set_version(version)
+                        return
             message = (
-                "<b>poetry-plugin-version</b>: No valid __version__ variable found "
+                f"<b>{name}</b>: No valid __version__ variable found "
                 "in __init__.py, cannot extract dynamic version"
             )
             io.write_error_line(message)
@@ -90,14 +90,14 @@ class VersionPlugin(Plugin):
             if result.returncode == 0:
                 tag = result.stdout.strip()
                 io.write_line(
-                    "<b>poetry-plugin-version</b>: Git tag found, setting "
+                    f"<b>{name}</b>: Git tag found, setting "
                     f"dynamic version to: {tag}"
                 )
                 poetry.package._set_version(tag)
                 return
             else:
                 message = (
-                    "<b>poetry-plugin-version</b>: No Git tag found, not "
+                    f"<b>{name}</b>: No Git tag found, not "
                     "extracting dynamic version"
                 )
                 io.write_error_line(message)
