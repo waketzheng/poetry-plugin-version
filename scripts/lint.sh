@@ -3,6 +3,6 @@
 set -e
 set -x
 
-mypy poetry_version_plugin
-black poetry_version_plugin tests --check
-isort poetry_version_plugin tests --check-only
+mypy poetry_plugin_version
+ruff format poetry_plugin_version tests --check
+ruff check poetry_plugin_version tests

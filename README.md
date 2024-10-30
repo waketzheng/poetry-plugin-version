@@ -1,3 +1,67 @@
+# Poetry Plugin Version
+
+> This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
+
+A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
+
+It can read the version from a file `__init__.py` with:
+
+```python
+# __init__.py
+
+__version__ = "0.1.0"
+```
+
+### Install Poetry Version Plugin
+
+Install this plugin to your Poetry:
+
+```console
+$ pipx inject poetry poetry-plugin-version
+
+--> 100%
+```
+
+### Set version in init file
+
+Set your package version in your file `__init__.py`, for example:
+
+```python
+from .main import do_awesome_stuff, AwesomeClass
+
+__version__ = "0.2.3"
+```
+
+And then edit your `pyproject.toml` with a section containing:
+
+```toml
+[tool.poetry-plugin-version]
+source = "init"
+```
+
+Next, build your project. It will show an output like:
+
+```console
+$ poetry build
+Using __init__.py file at my_awesome_package/__init__.py for dynamic version
+Setting package dynamic version to __version__ variable from __init__.py: 0.1.9
+Building my-awesome-package (0.1.9)
+  - Building sdist
+  - Built my-awesome-package-0.1.9.tar.gz
+  - Building wheel
+  - Built my-awesome-package-0.1.9-py3-none-any.whl
+```
+
+## Release Notes
+
+### Latest Changes
+
+### 0.2.2
+
+* 🔧 Migrate lint tool from autoflake/black/isort to ruff.
+
+<details>
+<summary>Origin README</summary>
 ## 🚨 WARNING: DEPRECATED 🚨
 
 This project is deprecated. You should not use it. And if you use it for existing libraries, you should migrate to other projects.
@@ -433,3 +497,5 @@ You can read more about it in the README: https://github.com/tiangolo/poetry-ver
 ## License
 
 This project is licensed under the terms of the MIT license.
+
+</details>

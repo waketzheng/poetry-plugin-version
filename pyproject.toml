@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "poetry-version-plugin"
-version = "0.2.1"
+name = "poetry-plugin-version"
+version = "0.2.2"
 description = "Poetry plugin for dynamically extracting the package version from a __version__ variable or a Git tag."
 authors = ["Sebastián Ramírez <tiangolo@gmail.com>"]
-homepage = "https://github.com/tiangolo/poetry-version-plugin"
-documentation = "https://github.com/tiangolo/poetry-version-plugin"
+homepage = "https://github.com/waketzheng/poetry-plugin-version"
+documentation = "https://github.com/waketzheng/poetry-plugin-version"
 readme = "README.md"
-packages = [{include = "poetry_version_plugin"}]
+packages = [{include = "poetry_plugin_version"}]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
@@ -24,29 +24,27 @@ classifiers = [
     "Topic :: System :: Software Distribution",
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License"
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-poetry = "^1.2.0"
+python = "^3.8"
+poetry = ">=1.2.0,<2"
 
-[tool.poetry.dev-dependencies]
-mypy = "^1.4.1"
-pytest = "^7.1.2"
-flake8 = "^3.9.2"
-black = "^23.3.0"
-coverage = {extras = ["toml"], version = "^7.2"}
-pkginfo = "^1.7.0"
-autoflake = "^1.4"
-isort = "^5.8.0"
+[tool.poetry.group.dev.dependencies]
+coverage = {extras = ["toml"], version = ">=7.2"}
+mypy = "^1.13.0"
+pytest = "^8.3.3"
+pkginfo = "^1.11.2"
+ruff = "^0.7.1"
 
 [tool.poetry.plugins."poetry.plugin"]
-poetry-version-plugin = "poetry_version_plugin.plugin:VersionPlugin"
+poetry-plugin-version = "poetry_plugin_version.plugin:VersionPlugin"
 
 [build-system]
 requires = ["poetry-core"]
@@ -54,6 +52,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 parallel = true
-
-[tool.isort]
-profile = "black"

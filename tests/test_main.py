@@ -5,7 +5,7 @@ from pathlib import Path
 import pkginfo
 
 testing_assets = Path(__file__).parent / "assets"
-plugin_source_dir = Path(__file__).parent.parent / "poetry_version_plugin"
+plugin_source_dir = Path(__file__).parent.parent / "poetry_plugin_version"
 
 
 def copy_assets(source_name: str, testing_dir: Path):
@@ -42,11 +42,11 @@ def test_defaults(tmp_path: Path):
     result = build_package(testing_dir=testing_dir)
 
     assert (
-        "poetry-version-plugin: Using __init__.py file at "
+        "poetry-plugin-version: Using __init__.py file at "
         "test_custom_version/__init__.py for dynamic version" in result.stdout
     )
     assert (
-        "poetry-version-plugin: Setting package dynamic version to __version__ "
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
         "variable from __init__.py: 0.0.1" in result.stdout
     )
     assert "Built test_custom_version-0.0.1-py3-none-any.whl" in result.stdout
@@ -60,11 +60,11 @@ def test_custom_packages(tmp_path: Path):
     copy_assets("custom_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: Using __init__.py file at custom_package/__init__.py "
+        "poetry-plugin-version: Using __init__.py file at custom_package/__init__.py "
         "for dynamic version" in result.stdout
     )
     assert (
-        "poetry-version-plugin: Setting package dynamic version to __version__ "
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
         "variable from __init__.py: 0.0.2" in result.stdout
     )
     assert "Built test_custom_version-0.0.2-py3-none-any.whl" in result.stdout
@@ -78,11 +78,11 @@ def test_variations(tmp_path: Path):
     copy_assets("variations", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: Using __init__.py file at "
+        "poetry-plugin-version: Using __init__.py file at "
         "test_custom_version/__init__.py for dynamic version" in result.stdout
     )
     assert (
-        "poetry-version-plugin: Setting package dynamic version to __version__ "
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
         "variable from __init__.py: 0.0.3" in result.stdout
     )
     assert "Built test_custom_version-0.0.3-py3-none-any.whl" in result.stdout
@@ -96,7 +96,7 @@ def test_no_version_var(tmp_path: Path):
     copy_assets("no_version_var", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: No valid __version__ variable found in __init__.py, "
+        "poetry-plugin-version: No valid __version__ variable found in __init__.py, "
         "cannot extract dynamic version" in result.stderr
     )
     assert result.returncode != 0
@@ -106,7 +106,7 @@ def test_no_standard_dir(tmp_path: Path):
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_standard_dir", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "poetry-version-plugin: __init__.py file not found at" in result.stderr
+    assert "poetry-plugin-version: __init__.py file not found at" in result.stderr
     assert result.returncode != 0
 
 
@@ -115,7 +115,7 @@ def test_multiple_packages(tmp_path: Path):
     copy_assets("multiple_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: More than one package set, cannot extract "
+        "poetry-plugin-version: More than one package set, cannot extract "
         "dynamic version" in result.stderr
     )
     assert result.returncode != 0
@@ -134,8 +134,8 @@ def test_no_config_source(tmp_path: Path):
     copy_assets("no_config_source", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: No source configuration found in "
-        "[tool.poetry-version-plugin] in pyproject.toml, not extracting dynamic version"
+        "poetry-plugin-version: No source configuration found in "
+        "[tool.poetry-plugin-version] in pyproject.toml, not extracting dynamic version"
     ) in result.stderr
     assert result.returncode != 0
 
@@ -203,7 +203,7 @@ def test_git_tag(tmp_path: Path):
     assert result.returncode == 0
     result = build_package(testing_dir=testing_dir)
     assert (
-        "poetry-version-plugin: Git tag found, setting dynamic version to: 0.0.9"
+        "poetry-plugin-version: Git tag found, setting dynamic version to: 0.0.9"
         in result.stdout
     )
     assert "Built test_custom_version-0.0.9-py3-none-any.whl" in result.stdout
