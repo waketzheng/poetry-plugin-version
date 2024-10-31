@@ -1,7 +1,7 @@
 import ast
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, NoReturn, Optional
 
 from cleo.io.io import IO
 from poetry.core.utils.helpers import module_name
@@ -10,6 +10,10 @@ from poetry.poetry import Poetry
 
 
 class VersionPlugin(Plugin):
+    def abort(self, message: str) -> NoReturn:
+        self.__io.write_error_line(message)
+        raise RuntimeError(message)
+
     def activate(self, poetry: Poetry, io: IO) -> None:
         name = "poetry-plugin-version"
         poetry_version_config: Optional[Dict[str, Any]] = poetry.pyproject.data.get(
@@ -17,37 +21,30 @@ class VersionPlugin(Plugin):
         ).get(name)
         if poetry_version_config is None:
             return
+        self.__io = io
         if not (version_source := poetry_version_config.get("source")):
-            message = (
-                "<b>{0}</b>: No <b>source</b> configuration found in "
-                "[tool.{0}] in pyproject.toml, not extracting "
-                "dynamic version"
-            ).format(name)
-            io.write_error_line(message)
-            raise RuntimeError(message)
+            self.abort(
+                f"<b>{name}</b>: No <b>source</b> configuration found in "
+                f"[tool.{name}] in pyproject.toml, not extracting dynamic version"
+            )
         if version_source == "init":
-            packages = poetry.local_config.get("packages")
-            if packages:
-                if len(packages) == 1:
-                    package_name = packages[0]["include"]
-                else:
-                    message = (
+            if packages := poetry.local_config.get("packages"):
+                if len(packages) != 1:
+                    self.abort(
                         f"<b>{name}</b>: More than one package set, "
                         "cannot extract dynamic version"
                     )
-                    io.write_error_line(message)
-                    raise RuntimeError(message)
+
+                package_name = packages[0]["include"]
             else:
                 package_name = module_name(poetry.package.name)
             if not (init_path := Path(package_name) / "__init__.py").is_file() and (
                 not (init_path := poetry.file.path.parent / init_path).is_file()
             ):
-                message = (
+                self.abort(
                     f"<b>{name}</b>: __init__.py file not found at "
                     f"{init_path} cannot extract dynamic version"
                 )
-                io.write_error_line(message)
-                raise RuntimeError(message)
             io.write_line(
                 f"<b>{name}</b>: Using __init__.py file at "
                 f"{init_path} for dynamic version"
@@ -57,8 +54,7 @@ class VersionPlugin(Plugin):
                 if isinstance(el, ast.Assign) and len(el.targets) == 1:
                     target = el.targets[0]
                     if isinstance(target, ast.Name) and target.id == "__version__":
-                        value_node = el.value
-                        if isinstance(value_node, ast.Constant):
+                        if isinstance(value_node := el.value, ast.Constant):
                             version = value_node.value
                         elif isinstance(value_node, ast.Str):
                             version = value_node.s
@@ -74,31 +70,26 @@ class VersionPlugin(Plugin):
                         )
                         poetry.package._set_version(version)
                         return
-            message = (
+            self.abort(
                 f"<b>{name}</b>: No valid __version__ variable found "
                 "in __init__.py, cannot extract dynamic version"
             )
-            io.write_error_line(message)
-            raise RuntimeError(message)
         elif version_source == "git-tag":
-            result = subprocess.run(
-                ["git", "describe", "--exact-match", "--tags", "HEAD"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
+            self.set_version_from_git_tag(poetry, io, name)
+
+    def set_version_from_git_tag(self, poetry: Poetry, io: IO, name: str) -> None:
+        result = subprocess.run(
+            ["git", "describe", "--exact-match", "--tags", "HEAD"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        if result.returncode != 0:
+            self.abort(
+                f"<b>{name}</b>: No Git tag found, not extracting dynamic version"
             )
-            if result.returncode == 0:
-                tag = result.stdout.strip()
-                io.write_line(
-                    f"<b>{name}</b>: Git tag found, setting "
-                    f"dynamic version to: {tag}"
-                )
-                poetry.package._set_version(tag)
-                return
-            else:
-                message = (
-                    f"<b>{name}</b>: No Git tag found, not "
-                    "extracting dynamic version"
-                )
-                io.write_error_line(message)
-                raise RuntimeError(message)
+        tag = result.stdout.strip()
+        io.write_line(
+            f"<b>{name}</b>: Git tag found, setting dynamic version to: {tag}"
+        )
+        poetry.package._set_version(tag)

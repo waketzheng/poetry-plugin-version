@@ -52,3 +52,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 parallel = true
+
+[tool.mypy]
+ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "poetry_plugin_version.*"
+disallow_untyped_defs = true
+strict = true

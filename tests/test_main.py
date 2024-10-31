@@ -4,16 +4,17 @@ from pathlib import Path
 
 import pkginfo
 
-testing_assets = Path(__file__).parent / "assets"
-plugin_source_dir = Path(__file__).parent.parent / "poetry_plugin_version"
+TEST_DIR = Path(__file__).parent
+testing_assets = TEST_DIR / "assets"
+plugin_source_dir = TEST_DIR.parent / "poetry_plugin_version"
 
 
-def copy_assets(source_name: str, testing_dir: Path):
+def copy_assets(source_name: str, testing_dir: Path) -> None:
     package_path = testing_assets / source_name
     shutil.copytree(package_path, testing_dir)
 
 
-def build_package(testing_dir: Path):
+def build_package(testing_dir: Path) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         [
             "coverage",
@@ -36,7 +37,7 @@ def build_package(testing_dir: Path):
     return result
 
 
-def test_defaults(tmp_path: Path):
+def test_defaults(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -52,10 +53,10 @@ def test_defaults(tmp_path: Path):
     assert "Built test_custom_version-0.0.1-py3-none-any.whl" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.1-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
-    assert info.version == "0.0.1"
+    assert info and info.version == "0.0.1"
 
 
-def test_custom_packages(tmp_path: Path):
+def test_custom_packages(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("custom_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -70,10 +71,10 @@ def test_custom_packages(tmp_path: Path):
     assert "Built test_custom_version-0.0.2-py3-none-any.whl" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.2-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
-    assert info.version == "0.0.2"
+    assert info and info.version == "0.0.2"
 
 
-def test_variations(tmp_path: Path):
+def test_variations(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("variations", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -88,10 +89,10 @@ def test_variations(tmp_path: Path):
     assert "Built test_custom_version-0.0.3-py3-none-any.whl" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.3-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
-    assert info.version == "0.0.3"
+    assert info and info.version == "0.0.3"
 
 
-def test_no_version_var(tmp_path: Path):
+def test_no_version_var(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_version_var", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -102,7 +103,7 @@ def test_no_version_var(tmp_path: Path):
     assert result.returncode != 0
 
 
-def test_no_standard_dir(tmp_path: Path):
+def test_no_standard_dir(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_standard_dir", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -110,7 +111,7 @@ def test_no_standard_dir(tmp_path: Path):
     assert result.returncode != 0
 
 
-def test_multiple_packages(tmp_path: Path):
+def test_multiple_packages(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("multiple_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -121,7 +122,7 @@ def test_multiple_packages(tmp_path: Path):
     assert result.returncode != 0
 
 
-def test_no_config(tmp_path: Path):
+def test_no_config(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_config", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -129,7 +130,7 @@ def test_no_config(tmp_path: Path):
     assert result.returncode == 0
 
 
-def test_no_config_source(tmp_path: Path):
+def test_no_config_source(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_config_source", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -140,7 +141,7 @@ def test_no_config_source(tmp_path: Path):
     assert result.returncode != 0
 
 
-def test_git_tag(tmp_path: Path):
+def test_git_tag(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("git_tag", testing_dir)
     result = result = subprocess.run(
@@ -209,4 +210,4 @@ def test_git_tag(tmp_path: Path):
     assert "Built test_custom_version-0.0.9-py3-none-any.whl" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.9-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
-    assert info.version == "0.0.9"
+    assert info and info.version == "0.0.9"
