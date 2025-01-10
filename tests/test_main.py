@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import functools
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
@@ -5,8 +9,9 @@ from pathlib import Path
 import pkginfo
 
 TEST_DIR = Path(__file__).parent
+ROOT_DIR = TEST_DIR.parent
 testing_assets = TEST_DIR / "assets"
-plugin_source_dir = TEST_DIR.parent / "poetry_plugin_version"
+plugin_source_dir = ROOT_DIR / "poetry_plugin_version"
 
 
 def copy_assets(source_name: str, testing_dir: Path) -> None:
@@ -14,26 +19,22 @@ def copy_assets(source_name: str, testing_dir: Path) -> None:
     shutil.copytree(package_path, testing_dir)
 
 
-def build_package(testing_dir: Path) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(
-        [
-            "coverage",
-            "run",
-            "--source",
-            str(plugin_source_dir),
-            "--parallel-mode",
-            "-m",
-            "poetry",
-            "build",
-        ],
-        cwd=testing_dir,
+def run_by_subprocess(cmd: str, cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        shlex.split(cmd),
+        cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         encoding="utf-8",
     )
+
+
+def build_package(testing_dir: Path) -> subprocess.CompletedProcess[str]:
+    cmd = f"coverage run --source {plugin_source_dir} --parallel-mode -m poetry build"
+    result = run_by_subprocess(cmd, cwd=testing_dir)
     coverage_path = list(testing_dir.glob(".coverage*"))[0]
-    dst_coverage_path = Path(__file__).parent.parent / coverage_path.name
-    dst_coverage_path.write_bytes(coverage_path.read_bytes())
+    dst_coverage_path = ROOT_DIR / coverage_path.name
+    shutil.copy(coverage_path, dst_coverage_path)
     return result
 
 
@@ -41,7 +42,6 @@ def test_defaults(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
-
     assert (
         "poetry-plugin-version: Using __init__.py file at "
         "test_custom_version/__init__.py for dynamic version" in result.stdout
@@ -144,43 +144,23 @@ def test_no_config_source(tmp_path: Path) -> None:
 def test_git_tag(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("git_tag", testing_dir)
-    result = result = subprocess.run(
-        [
-            "git",
-            "init",
-        ],
+    run_shell = functools.partial(run_by_subprocess, cwd=testing_dir)
+    result = run_shell("git init")
+    assert result.returncode == 0
+    result = run_shell("git config user.email tester@example.com")
+    assert result.returncode == 0
+    result = subprocess.run(
+        shlex.split("git config user.name Tester"),
         cwd=testing_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         encoding="utf-8",
     )
     assert result.returncode == 0
-    result = result = subprocess.run(
-        ["git", "config", "user.email", "tester@example.com"],
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
+    result = run_shell("git add .")
     assert result.returncode == 0
-    result = result = subprocess.run(
-        ["git", "config", "user.name", "Tester"],
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    assert result.returncode == 0
-    result = result = subprocess.run(
-        ["git", "add", "."],
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    assert result.returncode == 0
-    result = result = subprocess.run(
-        ["git", "commit", "-m", "release"],
+    result = subprocess.run(
+        shlex.split("git commit -m release"),
         cwd=testing_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -190,17 +170,7 @@ def test_git_tag(tmp_path: Path) -> None:
     result = build_package(testing_dir=testing_dir)
     assert "No Git tag found, not extracting dynamic version" in result.stderr
     assert result.returncode != 0
-    result = result = subprocess.run(
-        [
-            "git",
-            "tag",
-            "0.0.9",
-        ],
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
+    result = run_shell("git tag 0.0.9")
     assert result.returncode == 0
     result = build_package(testing_dir=testing_dir)
     assert (
