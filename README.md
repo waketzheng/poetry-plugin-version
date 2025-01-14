@@ -37,7 +37,13 @@ from .main import do_awesome_stuff, AwesomeClass
 __version__ = "0.2.3"
 ```
 
-And then edit your `pyproject.toml` with a section containing:
+And then change the `build_system` section in your `pyproject.toml`
+```toml
+[build_system]
+requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.4.0"]
+build-backend = "poetry_plugin_version.api"
+```
+Or edit your `pyproject.toml` with a section containing(not support `pip install --editable .`):
 
 ```toml
 [tool.poetry-plugin-version]

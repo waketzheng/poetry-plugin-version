@@ -141,6 +141,22 @@ def test_no_config_source(tmp_path: Path) -> None:
     assert result.returncode != 0
 
 
+def test_build_system(tmp_path: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("build_system", testing_dir)
+    result = build_package(testing_dir=testing_dir)
+    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert result.returncode == 0
+
+
+def test_poetry_v2(tmp_path: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("poetry_v2", testing_dir)
+    result = build_package(testing_dir=testing_dir)
+    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert result.returncode == 0
+
+
 def test_git_tag(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("git_tag", testing_dir)
