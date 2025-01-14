@@ -67,6 +67,14 @@ Building my-awesome-package (0.1.9)
 
 ### Latest Changes
 
+### 0.4.0
+
+* 🐛 Fix `pip install --editable .` failed to load version from `__init__.py::__version__`.
+
+### 0.3.0
+
+* 🔧 Drop support for Python3.8.
+
 ### 0.2.2
 
 * 🔧 Migrate lint tool from autoflake/black/isort to ruff.
