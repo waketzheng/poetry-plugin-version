@@ -39,10 +39,14 @@ class VersionPlugin(Plugin):
             return
         if version_source == "git-tag":
             self.set_version_from_git_tag(poetry, io, name)
+        elif version_source.endswith(".py"):
+            self.set_version_from_file(poetry, io, name, filename=version_source)
         else:
             self.set_version_from_file(poetry, io, name)
 
-    def set_version_from_file(self, poetry: "Poetry", io: "IO", name: str) -> None:
+    def set_version_from_file(
+        self, poetry: "Poetry", io: "IO", name: str, filename: str = "__init__.py"
+    ) -> None:
         if packages := poetry.local_config.get("packages"):
             if len(packages) != 1:
                 self.abort(
@@ -53,27 +57,27 @@ class VersionPlugin(Plugin):
             package_name = packages[0]["include"]
         else:
             package_name = module_name(poetry.package.name)
-        if not (init_path := Path(package_name) / "__init__.py").is_file() and (
+        if not (init_path := Path(package_name) / filename).is_file() and (
             not (init_path := poetry.file.path.parent / init_path).is_file()
         ):
             self.abort(
-                f"<b>{name}</b>: __init__.py file not found at "
+                f"<b>{name}</b>: {filename} file not found at "
                 f"{init_path} cannot extract dynamic version"
             )
         io.write_line(
-            f"<b>{name}</b>: Using __init__.py file at {init_path} for dynamic version"
+            f"<b>{name}</b>: Using {filename} file at {init_path} for dynamic version"
         )
         if version := get_version_from_file(init_path):
             io.write_line(
                 f"<b>{name}</b>: Setting package "
                 "dynamic version to __version__ "
-                f"variable from __init__.py: <b>{version}</b>"
+                f"variable from {filename}: <b>{version}</b>"
             )
             poetry.package._set_version(version)
             return
         self.abort(
             f"<b>{name}</b>: No valid __version__ variable found "
-            "in __init__.py, cannot extract dynamic version"
+            f"in {filename}, cannot extract dynamic version"
         )
 
     def set_version_from_git_tag(self, poetry: "Poetry", io: "IO", name: str) -> None:

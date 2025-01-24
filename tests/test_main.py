@@ -56,6 +56,24 @@ def test_defaults(tmp_path: Path) -> None:
     assert info and info.version == "0.0.1"
 
 
+def test_version_dot_py(tmp_path: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("version_dot_py", testing_dir)
+    result = build_package(testing_dir=testing_dir)
+    assert (
+        "poetry-plugin-version: Using version.py file at "
+        "test_custom_version/version.py for dynamic version" in result.stdout
+    )
+    assert (
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
+        "variable from version.py: 0.0.8" in result.stdout
+    )
+    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    wheel_path = testing_dir / "dist" / "test_custom_version-0.0.8-py3-none-any.whl"
+    info = pkginfo.get_metadata(str(wheel_path))
+    assert info and info.version == "0.0.8"
+
+
 def test_custom_packages(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("custom_packages", testing_dir)
