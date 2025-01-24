@@ -62,10 +62,22 @@ Building my-awesome-package (0.1.9)
   - Building wheel
   - Built my-awesome-package-0.1.9-py3-none-any.whl
 ```
+If the `__version__` is in other python file instead of `__init__.py`, e.g. in <package>/version.py, you can set it like this in the `pyproject.toml`:
+```toml
+[tool.poetry-plugin-version]
+source = "version.py"
+[build_system]
+requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.5.0"]
+build-backend = "poetry_plugin_version.api"
+```
 
 ## Release Notes
 
 ### Latest Changes
+
+### 0.5.0
+
+* ✨ Support `__version__` in `<package_name>/version.py`.
 
 ### 0.4.0
 
