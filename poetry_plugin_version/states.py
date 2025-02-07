@@ -74,8 +74,10 @@ def _get_pyproject_path_from_poetry(pyproject: "PyProjectTOML") -> Path:
     return cast(Path, recommended)
 
 
-def _get_version(pyproject_path: Path, name: str) -> str | None:
-    init_path = pyproject_path.parent / name / "__init__.py"
+def _get_version(
+    pyproject_path: Path, name: str, file: str = "__init__.py"
+) -> str | None:
+    init_path = pyproject_path.parent / name / file
     return get_version_from_file(init_path)
 
 
