@@ -3,16 +3,14 @@ from __future__ import annotations
 __all__ = []  # type: ignore
 
 import os
+from collections.abc import MutableMapping
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 from poetry.core.pyproject.toml import PyProjectTOML
 
 from .utils import get_version_from_file
-
-if TYPE_CHECKING:
-    from collections.abc import MutableMapping
 
 
 class _Mode(Enum):
@@ -28,7 +26,7 @@ class _ProjectState:
         version: str | None,
         mode: _Mode,
         dynamic_array: Any | None,
-        substitutions: "MutableMapping[Path, str] | None" = None,
+        substitutions: MutableMapping[Path, str] | None = None,
     ) -> None:
         self.path = path
         self.original_version = original_version
@@ -66,7 +64,7 @@ def _get_pyproject_path(start: Path | None = None) -> Path | None:
     return _find_higher_file("pyproject.toml", start=start)
 
 
-def _get_pyproject_path_from_poetry(pyproject: "PyProjectTOML") -> Path:
+def _get_pyproject_path_from_poetry(pyproject: PyProjectTOML) -> Path:
     if not (recommended := getattr(pyproject, "path", None)):
         raise RuntimeError(
             "Unable to determine pyproject.toml path from Poetry instance"

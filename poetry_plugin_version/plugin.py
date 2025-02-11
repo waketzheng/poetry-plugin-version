@@ -19,7 +19,7 @@ class VersionPlugin(Plugin):
         self.__io.write_error_line(message)
         raise RuntimeError(message)
 
-    def activate(self, poetry: "Poetry", io: "IO") -> None:
+    def activate(self, poetry: Poetry, io: IO) -> None:
         name = "poetry-plugin-version"
         pyproject_data = poetry.pyproject.data
         tool_item = pyproject_data.get("tool", {})
@@ -30,7 +30,10 @@ class VersionPlugin(Plugin):
         if poetry_version_config is None and not_in_build_system:
             return
         self.__io = io
-        if not (version_source := (poetry_version_config or {}).get("source")):
+        if not (version_source := (poetry_version_config or {}).get("source")) and not (
+            # Accept `path = package_dir/version.py` format to compare with pdm.
+            version_source := (poetry_version_config or {}).get("path")
+        ):
             if tool_item.get("poetry", {}).get("version") in ("0", "0.0.0"):
                 if not_in_build_system:
                     self.abort(
@@ -47,7 +50,7 @@ class VersionPlugin(Plugin):
             self.set_version_from_file(poetry, io, name)
 
     def set_version_from_file(
-        self, poetry: "Poetry", io: "IO", name: str, filename: str = "__init__.py"
+        self, poetry: Poetry, io: IO, name: str, filename: str = "__init__.py"
     ) -> None:
         init_path = Path(filename)
         if Path(init_path.name) == init_path or not init_path.is_file():
@@ -84,12 +87,12 @@ class VersionPlugin(Plugin):
             f"in {filename}, cannot extract dynamic version"
         )
 
-    def set_version_from_git_tag(self, poetry: "Poetry", io: "IO", name: str) -> None:
+    def set_version_from_git_tag(self, poetry: Poetry, io: IO, name: str) -> None:
         result = subprocess.run(
             ["git", "describe", "--exact-match", "--tags", "HEAD"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            universal_newlines=True,
+            text=True,
         )
         if result.returncode != 0:
             self.abort(

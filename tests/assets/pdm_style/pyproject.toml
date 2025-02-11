@@ -1,0 +1,17 @@
+[project]
+name = "test-custom-version"
+description = ""
+authors = [{name="Sebastián Ramírez", email="tiangolo@gmail.com"}]
+readme = "README.md"
+dynamic = ["version"]
+requires-python = ">=3.9"
+
+[tool.poetry]
+version = "0"
+
+[tool.poetry-plugin-version]
+path = "test_custom_version/version.py"
+
+[build-system]
+requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.5.0"]
+build-backend = "poetry_plugin_version.api"

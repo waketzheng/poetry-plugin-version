@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 def _patch_poetry_create(factory_mod: ModuleType) -> None:
     from poetry.core.constraints.version import Version as PoetryVersion
 
-    original_poetry_create: Callable[..., "Poetry"] = factory_mod.Factory.create_poetry
+    original_poetry_create: Callable[..., Poetry] = factory_mod.Factory.create_poetry
 
     @functools.wraps(original_poetry_create)
     def alt_poetry_create(cls: "Factory", *args: Any, **kwargs: Any) -> "Poetry":
-        instance: "Poetry" = original_poetry_create(cls, *args, **kwargs)
+        instance: Poetry = original_poetry_create(cls, *args, **kwargs)
 
         if not _state.cli_mode:
             name = _get_and_apply_version(

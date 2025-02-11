@@ -23,8 +23,7 @@ def run_by_subprocess(cmd: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         shlex.split(cmd),
         cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         encoding="utf-8",
     )
 
@@ -80,6 +79,11 @@ class TestVersionDotPy:
 
 class TestWithDirname(TestVersionDotPy):
     asset_dir = "with_dirname"
+    version_file = "test_custom_version/version.py"
+
+
+class TestPdmStyle(TestVersionDotPy):
+    asset_dir = "pdm_style"
     version_file = "test_custom_version/version.py"
 
 
@@ -192,23 +196,11 @@ def test_git_tag(tmp_path: Path) -> None:
     assert result.returncode == 0
     result = run_shell("git config user.email tester@example.com")
     assert result.returncode == 0
-    result = subprocess.run(
-        shlex.split("git config user.name Tester"),
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
+    result = run_shell("git config user.name Tester")
     assert result.returncode == 0
     result = run_shell("git add .")
     assert result.returncode == 0
-    result = subprocess.run(
-        shlex.split("git commit -m release"),
-        cwd=testing_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        encoding="utf-8",
-    )
+    result = run_shell("git commit -m release")
     assert result.returncode == 0
     result = build_package(testing_dir=testing_dir)
     assert "No Git tag found, not extracting dynamic version" in result.stderr
