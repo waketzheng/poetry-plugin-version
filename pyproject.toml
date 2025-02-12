@@ -1,10 +1,10 @@
-[tool.poetry]
+[project]
 name = "poetry-plugin-version"
 version = "0.5.0"
 description = "Poetry plugin for dynamically extracting the package version from a __version__ variable or a Git tag."
 authors = [
-    "Sebastián Ramírez <tiangolo@gmail.com>",
-    "Waket Zheng <waketzheng@gmail.com>",
+    { name="Sebastián Ramírez", email="tiangolo@gmail.com" },  # For version<=0.2.1 which published as `poetry-version-plugin`
+    { name="Waket Zheng", email="waketzheng@gmail.com" },  # For version>=0.3.0 which published as `poetry-plugin-version`
 ]
 homepage = "https://github.com/waketzheng/poetry-plugin-version"
 documentation = "https://github.com/waketzheng/poetry-plugin-version"
@@ -34,10 +34,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License"
 ]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-poetry = ">=2.0"
+requires-python = ">=3.9,<4"
+dependencies = ["poetry>=2.0"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=7.2"}
