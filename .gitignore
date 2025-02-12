@@ -1,6 +1,5 @@
 .mypy_cache/
 env*
-poetry.lock
 dist/
 __pycache__/
 htmlcov

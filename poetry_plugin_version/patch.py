@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import functools
-from collections.abc import Callable
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 from .states import (
     _get_and_apply_version,
@@ -20,7 +21,7 @@ def _patch_poetry_create(factory_mod: ModuleType) -> None:
     original_poetry_create: Callable[..., Poetry] = factory_mod.Factory.create_poetry
 
     @functools.wraps(original_poetry_create)
-    def alt_poetry_create(cls: "Factory", *args: Any, **kwargs: Any) -> "Poetry":
+    def alt_poetry_create(cls: Factory, *args: Any, **kwargs: Any) -> Poetry:
         instance: Poetry = original_poetry_create(cls, *args, **kwargs)
 
         if not _state.cli_mode:

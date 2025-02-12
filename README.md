@@ -5,7 +5,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
-and fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
+with some enhancements and fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
 
 A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
 
@@ -40,14 +40,8 @@ __version__ = "0.2.3"
 And then change the `build_system` section in your `pyproject.toml`
 ```toml
 [build_system]
-requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.4.0"]
+requires = ["poetry-plugin-version>=0.5.1"]
 build-backend = "poetry_plugin_version.api"
-```
-Or edit your `pyproject.toml` with a section containing(not support `pip install --editable .`):
-
-```toml
-[tool.poetry-plugin-version]
-source = "init"
 ```
 
 Next, build your project. It will show an output like:
@@ -55,25 +49,34 @@ Next, build your project. It will show an output like:
 ```console
 $ poetry build
 Using __init__.py file at my_awesome_package/__init__.py for dynamic version
-Setting package dynamic version to __version__ variable from __init__.py: 0.1.9
-Building my-awesome-package (0.1.9)
+Setting package dynamic version to __version__ variable from __init__.py: 0.2.3
+Building my-awesome-package (0.2.3)
   - Building sdist
-  - Built my-awesome-package-0.1.9.tar.gz
+  - Built my-awesome-package-0.2.3.tar.gz
   - Building wheel
-  - Built my-awesome-package-0.1.9-py3-none-any.whl
+  - Built my-awesome-package-0.2.3-py3-none-any.whl
 ```
-If the `__version__` is in other python file instead of `__init__.py`, e.g. in <package>/version.py, you can set it like this in the `pyproject.toml`:
+If the `__version__` is in other python file instead of `__init__.py`, e.g. in `<package>/version.py`, you can set it like this in the `pyproject.toml`:
 ```toml
 [tool.poetry-plugin-version]
 source = "version.py"
+
 [build_system]
-requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.5.0"]
+requires = ["poetry-plugin-version>=0.5.1"]
 build-backend = "poetry_plugin_version.api"
 ```
 
 ## Release Notes
 
 ### Latest Changes
+
+### 0.5.1
+
+* 🔥 Remove `poetry` from dependencies (use `poetry-core` instead).
+* 🧑‍💻 Use pep621 style for metadata in `pyproject.toml`.
+* 🩹 Fix version file detect error when source value with dirname.
+* ✨ Support `path` as alternative of `source`.
+* 🔧 Remove `poetry.lock` from `.gitignore` and manage it by git.
 
 ### 0.5.0
 
