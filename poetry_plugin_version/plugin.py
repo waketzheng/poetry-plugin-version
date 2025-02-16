@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -15,8 +16,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class VersionPlugin(Plugin):
-    def abort(self, message: str) -> NoReturn:
-        self.__io.write_error_line(message)
+    def abort(self, message: str, io: IO) -> NoReturn:
+        io.write_error_line(message)
         raise RuntimeError(message)
 
     def activate(self, poetry: Poetry, io: IO) -> None:
@@ -29,14 +30,14 @@ class VersionPlugin(Plugin):
         ).lower().replace("_", "-")
         if poetry_version_config is None and not_in_build_system:
             return
-        self.__io = io
+        abort = partial(self.abort, io=io)
         if not (version_source := (poetry_version_config or {}).get("source")) and not (
             # Accept `path = package_dir/version.py` format to compare with pdm.
             version_source := (poetry_version_config or {}).get("path")
         ):
             if tool_item.get("poetry", {}).get("version") in ("0", "0.0.0"):
                 if not_in_build_system:
-                    self.abort(
+                    abort(
                         f"<b>{name}</b>: No <b>source</b> configuration found in "
                         f"[tool.{name}] in pyproject.toml, not extracting dynamic version"
                     )
@@ -58,7 +59,8 @@ class VersionPlugin(Plugin):
                 if len(packages) != 1:
                     self.abort(
                         f"<b>{name}</b>: More than one package set, "
-                        "cannot extract dynamic version"
+                        "cannot extract dynamic version",
+                        io=io,
                     )
 
                 package_name = packages[0]["include"]
@@ -69,7 +71,8 @@ class VersionPlugin(Plugin):
             ):
                 self.abort(
                     f"<b>{name}</b>: {filename} file not found at "
-                    f"{init_path} cannot extract dynamic version"
+                    f"{init_path} cannot extract dynamic version",
+                    io=io,
                 )
         io.write_line(
             f"<b>{name}</b>: Using {filename} file at {init_path} for dynamic version"
@@ -84,7 +87,8 @@ class VersionPlugin(Plugin):
             return
         self.abort(
             f"<b>{name}</b>: No valid __version__ variable found "
-            f"in {filename}, cannot extract dynamic version"
+            f"in {filename}, cannot extract dynamic version",
+            io=io,
         )
 
     def set_version_from_git_tag(self, poetry: Poetry, io: IO, name: str) -> None:
@@ -96,7 +100,8 @@ class VersionPlugin(Plugin):
         )
         if result.returncode != 0:
             self.abort(
-                f"<b>{name}</b>: No Git tag found, not extracting dynamic version"
+                f"<b>{name}</b>: No Git tag found, not extracting dynamic version",
+                io=io,
             )
         tag = result.stdout.strip()
         io.write_line(

@@ -28,8 +28,10 @@ def run_by_subprocess(cmd: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def build_package(testing_dir: Path) -> subprocess.CompletedProcess[str]:
-    cmd = f"coverage run --source {plugin_source_dir} --parallel-mode -m poetry build"
+def build_package(
+    testing_dir: Path, command: str = "poetry build"
+) -> subprocess.CompletedProcess[str]:
+    cmd = f"coverage run --source {plugin_source_dir} --parallel-mode -m {command}"
     result = run_by_subprocess(cmd, cwd=testing_dir)
     coverage_path = list(testing_dir.glob(".coverage*"))[0]
     dst_coverage_path = ROOT_DIR / coverage_path.name
@@ -185,6 +187,14 @@ def test_poetry_v2(tmp_path: Path) -> None:
     copy_assets("poetry_v2", testing_dir)
     result = build_package(testing_dir=testing_dir)
     assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert result.returncode == 0
+
+
+def test_poetry_v2_api(tmp_path: Path, media_server: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("poetry_v2_api", testing_dir)
+    result = build_package(testing_dir, command="pip install -e .")
+    assert "Successfully installed test-custom-version-0.0.8" in result.stdout
     assert result.returncode == 0
 
 
