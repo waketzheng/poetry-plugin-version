@@ -70,6 +70,9 @@ build-backend = "poetry_plugin_version.api"
 
 ### Latest Changes
 
+### 0.5.2
+* 🐛 Fix `pip install -e .` failed to get version when project name contains `-` or ` `
+
 ### 0.5.1
 
 * 🔥 Remove `poetry` from dependencies (use `poetry-core` instead).
