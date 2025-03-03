@@ -9,5 +9,5 @@ readme = "README.md"
 python = "^3.9"
 
 [build-system]
-requires = ["poetry-core", "poetry-plugin-version>=0.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry_plugin_version @ http://localhost:8000/dist/poetry_plugin_version-0-py3-none-any.whl"]
+build-backend = "poetry_plugin_version.api"

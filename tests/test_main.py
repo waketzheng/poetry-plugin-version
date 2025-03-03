@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import os
 import shlex
 import shutil
 import subprocess
@@ -90,6 +91,8 @@ class TestPdmStyle(TestVersionDotPy):
 
 
 def test_custom_packages(tmp_path: Path) -> None:
+    if os.getenv("PPV_HOME_TMP"):
+        (tmp_path := Path.home() / "tmp2").mkdir()
     testing_dir = tmp_path / "testing_package"
     copy_assets("custom_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -101,7 +104,7 @@ def test_custom_packages(tmp_path: Path) -> None:
         "poetry-plugin-version: Setting package dynamic version to __version__ "
         "variable from __init__.py: 0.0.2" in result.stdout
     )
-    assert "Built test_custom_version-0.0.2-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.2)" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.2-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
     assert info and info.version == "0.0.2"
@@ -178,7 +181,7 @@ def test_build_system(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("build_system", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
 
 
@@ -186,11 +189,11 @@ def test_poetry_v2(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
 
 
-def test_poetry_v2_api(tmp_path: Path, media_server: Path) -> None:
+def test_poetry_v2_api(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2_api", testing_dir)
     result = build_package(testing_dir, command="pip install -e .")

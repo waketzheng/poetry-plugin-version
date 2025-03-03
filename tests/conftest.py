@@ -76,7 +76,7 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def media_server() -> Generator[Path]:
     # Build a whl file with version=0
     dist_dir = build_version_0_whl()

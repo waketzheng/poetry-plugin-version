@@ -10,6 +10,11 @@ homepage = "https://github.com/waketzheng/poetry-plugin-version"
 documentation = "https://github.com/waketzheng/poetry-plugin-version"
 readme = "README.md"
 packages = [{include = "poetry_plugin_version"}]
+dynamic = ["classifiers"]
+requires-python = ">=3.9"
+dependencies = ["poetry-core>=2.0"]
+
+[tool.poetry]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
@@ -34,10 +39,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License"
 ]
-requires-python = ">=3.9"
-dependencies = ["poetry-core>=2.0"]
-
-[tool.poetry]
 requires-poetry = ">=2.0"
 
 [tool.poetry.dependencies]
