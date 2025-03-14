@@ -26,6 +26,7 @@ $ pipx inject poetry poetry-plugin-version
 
 --> 100%
 ```
+Or `poetry self add poetry-plugin-version`
 
 ### Set version in init file
 
@@ -40,7 +41,7 @@ __version__ = "0.2.3"
 And then change the `build_system` section in your `pyproject.toml`
 ```toml
 [build_system]
-requires = ["poetry-plugin-version>=0.5.1"]
+requires = ["poetry-plugin-version>=0.5.3"]
 build-backend = "poetry_plugin_version.api"
 ```
 
@@ -62,13 +63,16 @@ If the `__version__` is in other python file instead of `__init__.py`, e.g. in `
 source = "version.py"
 
 [build_system]
-requires = ["poetry-plugin-version>=0.5.1"]
+requires = ["poetry-plugin-version>=0.5.3"]
 build-backend = "poetry_plugin_version.api"
 ```
 
 ## Release Notes
 
 ### Latest Changes
+
+### 0.5.3
+* 🐛 Fix `pip install -e .` failed to get version when with poetry2.1+
 
 ### 0.5.2
 * 🐛 Fix `pip install -e .` failed to get version when project name contains `-` or ` `
