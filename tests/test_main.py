@@ -74,7 +74,7 @@ class TestVersionDotPy:
             "poetry-plugin-version: Setting package dynamic version to __version__ "
             f"variable from {self.version_file}: 0.0.8" in result.stdout
         )
-        assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+        assert "Building test-custom-version (0.0.8)" in result.stdout
         wheel_path = testing_dir / "dist" / "test_custom_version-0.0.8-py3-none-any.whl"
         info = pkginfo.get_metadata(str(wheel_path))
         assert info and info.version == "0.0.8"
