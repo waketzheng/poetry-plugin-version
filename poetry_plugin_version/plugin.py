@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any
 
 from poetry.core.utils.helpers import module_name
 from poetry.plugins.plugin import Plugin
@@ -11,12 +11,15 @@ from poetry.plugins.plugin import Plugin
 from .utils import get_version_from_file
 
 if TYPE_CHECKING:  # pragma: no cover
+    from typing import NoReturn
+
     from cleo.io.io import IO
     from poetry.poetry import Poetry
 
 
 class VersionPlugin(Plugin):
-    def abort(self, message: str, io: IO) -> NoReturn:
+    @staticmethod
+    def abort(message: str, io: IO) -> NoReturn:
         io.write_error_line(message)
         raise RuntimeError(message)
 

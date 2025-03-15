@@ -28,6 +28,8 @@ $ pipx inject poetry poetry-plugin-version
 ```
 Or `poetry self add poetry-plugin-version`
 
+*To remove this plugin, use `pipx uninject poetry poetry-plugin-version` or `poetry self remove poetry-plugin-version`*
+
 ### Set version in init file
 
 Set your package version in your file `__init__.py`, for example:
