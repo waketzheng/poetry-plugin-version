@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.9"
 
 [build-system]
+# For local debug: requires = ["poetry-plugin-version@../../.."]
 requires = ["poetry-plugin-version @ http://localhost:8000/dist/poetry_plugin_version-0-py3-none-any.whl"]
 build-backend = "poetry_plugin_version.api"
 

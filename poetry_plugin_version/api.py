@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+
 from poetry.core.masonry.api import (
     build_sdist,
     build_wheel,
@@ -9,6 +11,12 @@ from poetry.core.masonry.api import (
 )
 
 from . import patch
+
+with contextlib.suppress(ImportError):
+    from poetry.console.commands.build import BuildHandler
+
+    # to be optimize
+    BuildHandler._requires_isolated_build = lambda *args, **kw: False  # type:ignore
 
 patch.activate()
 
