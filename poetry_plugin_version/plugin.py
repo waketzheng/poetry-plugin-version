@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import subprocess
 from functools import partial
 from pathlib import Path
@@ -16,12 +15,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from cleo.io.io import IO
     from poetry.poetry import Poetry
-
-with contextlib.suppress(ImportError):
-    from poetry.console.commands.build import BuildHandler
-
-    # to be optimize
-    BuildHandler._requires_isolated_build = lambda *args, **kw: False  # type:ignore
 
 
 class VersionPlugin(Plugin):

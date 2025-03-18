@@ -1,7 +1,7 @@
 [project]
 name = "test-custom-version"
 description = ""
-authors = [{name="Sebastián Ramírez", email="tiangolo@gmail.com"}]
+authors = []
 readme = "README.md"
 dynamic = ["version"]
 requires-python = ">=3.9"
@@ -13,5 +13,5 @@ version = "0"
 path = "test_custom_version/version.py"
 
 [build-system]
-requires = ["poetry-core>=2.0", "poetry-plugin-version>=0.5.0"]
+requires = ["poetry-plugin-version@../../.."]
 build-backend = "poetry_plugin_version.api"

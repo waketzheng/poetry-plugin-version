@@ -1,7 +1,7 @@
 [project]
 name = "test-custom-version"
 description = ""
-authors = [{name="Waket Zheng", email="waketzheng@gmail.com"}]
+authors = []
 readme = "README.md"
 dynamic = ["version"]
 requires-python = ">=3.9"
@@ -10,6 +10,8 @@ requires-python = ">=3.9"
 version = "0"
 
 [build-system]
-# requires = ["poetry-plugin-version@../../.."]
-requires = ["poetry-plugin-version @ http://localhost:8000/dist/poetry_plugin_version-0-py3-none-any.whl"]
+# Relative path only work for `poetry build`, not work for `pip install -e .`
+requires = ["poetry-plugin-version@../../.."]
+# To test editable install, use absolute path instead
+#requires = ["poetry-plugin-version@file://$(pwd)/../../../dist/poetry_plugin_version-0-py3-none-any.whl"]
 build-backend = "poetry_plugin_version.api"

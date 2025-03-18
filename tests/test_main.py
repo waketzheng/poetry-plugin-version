@@ -10,7 +10,8 @@ from pathlib import Path
 import pkginfo
 
 TEST_DIR = Path(__file__).parent
-ROOT_DIR = TEST_DIR.parent
+ROOT_DIR = TEST_DIR.parent.resolve()
+WHEEL_FILE = ROOT_DIR / "dist" / "poetry_plugin_version-0-py3-none-any.whl"
 testing_assets = TEST_DIR / "assets"
 plugin_source_dir = ROOT_DIR / "poetry_plugin_version"
 
@@ -18,6 +19,11 @@ plugin_source_dir = ROOT_DIR / "poetry_plugin_version"
 def copy_assets(source_name: str, testing_dir: Path) -> None:
     package_path = testing_assets / source_name
     shutil.copytree(package_path, testing_dir)
+    pyproject = testing_dir / "pyproject.toml"
+    s = pyproject.read_text("utf8")
+    if (relative := "../../..") in s:
+        ss = s.replace(relative, "file://" + WHEEL_FILE.as_posix())
+        pyproject.write_text(ss, encoding="utf8")
 
 
 def run_by_subprocess(cmd: str, cwd: Path) -> subprocess.CompletedProcess[str]:

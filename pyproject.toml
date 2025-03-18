@@ -47,8 +47,6 @@ coverage = {extras = ["toml"], version = ">=7.2"}
 mypy = "^1.15.0"
 pytest = "^8.3.5"
 ruff = "^0.10.0"
-fastapi = "^0.115.11"
-uvicorn = "^0.34.0"
 
 [project.entry-points."poetry.plugin"]
 poetry-plugin-version = "poetry_plugin_version.plugin:VersionPlugin"
