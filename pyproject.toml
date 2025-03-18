@@ -3,7 +3,7 @@ name = "poetry-plugin-version"
 version = "0.5.3"
 description = "Poetry plugin for dynamically extracting the package version from a __version__ variable or a Git tag."
 authors = [
-    { name="Waket Zheng", email="waketzheng@gmail.com" },  # For version>=0.3.0 which published as `poetry-plugin-version`
+    { name="Waket Zheng", email="waketzheng@gmail.com" },  # For version>=0.2.2 which published as `poetry-plugin-version`
     { name="Sebastián Ramírez", email="tiangolo@gmail.com" },  # For version<=0.2.1 which published as `poetry-version-plugin`
 ]
 homepage = "https://github.com/waketzheng/poetry-plugin-version"

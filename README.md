@@ -5,7 +5,8 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > Base on [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin) and [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning).
-Support `poetry build` and `pip install -e .`✨
+>
+> Support `poetry build` and `pip install -e .`✨
 
 A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
 
@@ -434,7 +435,7 @@ But this is not supported:
 # 🚨 Not supported
 
 if 2 == 2:
-    __version__ = "0.1.0
+    __version__ = "0.1.0"
 ```
 
 And this is not supported:
