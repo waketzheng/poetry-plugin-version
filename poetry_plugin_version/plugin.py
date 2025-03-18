@@ -69,14 +69,21 @@ class VersionPlugin(Plugin):
                 package_name = packages[0]["include"]
             else:
                 package_name = module_name(poetry.package.name)
-            if not (init_path := Path(package_name) / filename).is_file() and (
-                not (init_path := poetry.file.path.parent / init_path).is_file()
-            ):
-                self.abort(
-                    f"<b>{name}</b>: {filename} file not found at "
-                    f"{init_path} cannot extract dynamic version",
-                    io=io,
-                )
+            init_path = Path(package_name) / filename
+            if not init_path.is_file():
+                root_dir = poetry.file.path.parent
+                if (init_ := root_dir / init_path).is_file():
+                    init_path = init_
+                elif (src_init := Path("src") / init_path).is_file():
+                    init_path = src_init
+                elif (abs_src_init := root_dir / "src" / init_path).is_file():
+                    init_path = abs_src_init
+                else:
+                    self.abort(
+                        f"<b>{name}</b>: {filename} file not found at "
+                        f"{init_path} cannot extract dynamic version",
+                        io=io,
+                    )
         io.write_line(
             f"<b>{name}</b>: Using {filename} file at {init_path} for dynamic version"
         )
