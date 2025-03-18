@@ -206,13 +206,8 @@ def test_poetry_v2_api(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2_api", testing_dir)
     result = build_package(testing_dir, command="pip install -e .")
-    assert (
-        "Successfully installed test-custom-version-0.0.8" in result.stdout
-        or "done" in result.stdout
-    )
-    dist_dir = testing_dir / "dist"
-    assert list(dist_dir.glob("*0.0.8*"))
-    # assert result.returncode == 0
+    assert result.returncode == 0
+    assert "Successfully installed test-custom-version-0.0.8" in result.stdout
 
 
 def test_git_tag(tmp_path: Path) -> None:

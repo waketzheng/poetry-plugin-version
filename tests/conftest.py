@@ -1,37 +1,20 @@
-import os
+import re
 import subprocess
-from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 
 
-def build_version_0_whl() -> Path:
+def build_version_0_whl() -> None:
+    subprocess.check_call(["poetry", "build", "--clean", "--format", "wheel"])
     root_dir = Path(__file__).parent.resolve().parent
-    pyproject = root_dir / "pyproject.toml"
-    text = pyproject.read_text(encoding="utf-8")
-    dist_dir = root_dir.joinpath("dist")
-    lines = text.splitlines()
-    for index, line in enumerate(lines):
-        line = line.split("#")[0].rstrip()
-        if line.startswith('version = "') and line.endswith('"'):
-            lines[index] = 'version = "0"'
-            break
-    pyproject.write_text(os.linesep.join(lines), encoding="utf-8")
-    try:
-        subprocess.run(["poetry", "build", "--clean", "--format", "wheel"])
-    finally:
-        pyproject.write_text(text, encoding="utf-8")
-    return dist_dir
-
-
-@pytest.fixture(scope="session")
-def anyio_backend() -> str:
-    return "asyncio"
+    dist_dir = root_dir / "dist"
+    whl_file = list(dist_dir.glob("*.whl"))[0]
+    new_name = re.sub(r"(.*)-\d+\.\d+\.\d+(.*)", r"\1-0\2", whl_file.name)
+    whl_file.rename(whl_file.with_name(new_name))
 
 
 @pytest.fixture(scope="session", autouse=True)
-def prepare_wheel_file() -> Generator[Path]:
+def prepare_wheel_file() -> None:
     # Build a whl file with version=0
-    dist_dir = build_version_0_whl()
-    yield dist_dir
+    build_version_0_whl()
