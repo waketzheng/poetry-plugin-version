@@ -2,7 +2,7 @@
 name = "test-custom-version"
 version = "0"
 description = ""
-authors = ["Sebastián Ramírez <tiangolo@gmail.com>"]
+authors = []
 readme = "README.md"
 
 [tool.poetry.dependencies]

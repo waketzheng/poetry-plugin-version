@@ -4,8 +4,8 @@
 ![Mypy coverage](https://img.shields.io/badge/mypy-100%25-green.svg)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-> This is a fork of [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin)
-with some enhancements and fixes ([#1](https://github.com/waketzheng/poetry-plugin-version/issues/1))
+> Base on [poetry-version-plugin](https://github.com/tiangolo/poetry-version-plugin) and [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning).
+Support `poetry build` and `pip install -e .`✨
 
 A [**Poetry**](https://python-poetry.org/) plugin for dynamically extracting the package **version**.
 
@@ -26,6 +26,9 @@ $ pipx inject poetry poetry-plugin-version
 
 --> 100%
 ```
+Or `poetry self add poetry-plugin-version`
+
+*To remove this plugin, use `pipx uninject poetry poetry-plugin-version` or `poetry self remove poetry-plugin-version`*
 
 ### Set version in init file
 
@@ -40,7 +43,7 @@ __version__ = "0.2.3"
 And then change the `build_system` section in your `pyproject.toml`
 ```toml
 [build_system]
-requires = ["poetry-plugin-version>=0.5.1"]
+requires = ["poetry-plugin-version"]
 build-backend = "poetry_plugin_version.api"
 ```
 
@@ -62,13 +65,16 @@ If the `__version__` is in other python file instead of `__init__.py`, e.g. in `
 source = "version.py"
 
 [build_system]
-requires = ["poetry-plugin-version>=0.5.1"]
+requires = ["poetry-plugin-version"]
 build-backend = "poetry_plugin_version.api"
 ```
 
 ## Release Notes
 
 ### Latest Changes
+
+### 0.5.3
+* 🐛 Fix `pip install -e .` failed to get version when with poetry2.1+
 
 ### 0.5.2
 * 🐛 Fix `pip install -e .` failed to get version when project name contains `-` or ` `

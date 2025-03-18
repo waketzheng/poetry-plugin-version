@@ -8,3 +8,4 @@ coverage.xml
 .vscode
 .idea
 .dmypy.json
+venv/

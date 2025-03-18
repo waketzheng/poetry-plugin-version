@@ -2,7 +2,7 @@
 name = "test-custom-version"
 version = "0"
 description = ""
-authors = ["Sebastián Ramírez <tiangolo@gmail.com>"]
+authors = []
 readme = "README.md"
 packages = [{include = "custom_package"}]
 
@@ -10,8 +10,8 @@ packages = [{include = "custom_package"}]
 python = "^3.9"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-plugin-version@../../.."]
+build-backend = "poetry_plugin_version.api"
 
 [tool.poetry-plugin-version]
 source = "init"

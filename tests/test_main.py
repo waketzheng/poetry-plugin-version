@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import os
 import shlex
 import shutil
 import subprocess
@@ -9,7 +10,8 @@ from pathlib import Path
 import pkginfo
 
 TEST_DIR = Path(__file__).parent
-ROOT_DIR = TEST_DIR.parent
+ROOT_DIR = TEST_DIR.parent.resolve()
+WHEEL_FILE = ROOT_DIR / "dist" / "poetry_plugin_version-0-py3-none-any.whl"
 testing_assets = TEST_DIR / "assets"
 plugin_source_dir = ROOT_DIR / "poetry_plugin_version"
 
@@ -17,6 +19,11 @@ plugin_source_dir = ROOT_DIR / "poetry_plugin_version"
 def copy_assets(source_name: str, testing_dir: Path) -> None:
     package_path = testing_assets / source_name
     shutil.copytree(package_path, testing_dir)
+    pyproject = testing_dir / "pyproject.toml"
+    s = pyproject.read_text("utf8")
+    if (relative := "../../..") in s:
+        ss = s.replace(relative, "file://" + WHEEL_FILE.as_posix())
+        pyproject.write_text(ss, encoding="utf8")
 
 
 def run_by_subprocess(cmd: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -33,9 +40,12 @@ def build_package(
 ) -> subprocess.CompletedProcess[str]:
     cmd = f"coverage run --source {plugin_source_dir} --parallel-mode -m {command}"
     result = run_by_subprocess(cmd, cwd=testing_dir)
-    coverage_path = list(testing_dir.glob(".coverage*"))[0]
-    dst_coverage_path = ROOT_DIR / coverage_path.name
-    shutil.copy(coverage_path, dst_coverage_path)
+    if result.returncode != 0:
+        result = run_by_subprocess(command, cwd=testing_dir)
+    else:
+        coverage_path = list(testing_dir.glob(".coverage*"))[0]
+        dst_coverage_path = ROOT_DIR / coverage_path.name
+        shutil.copy(coverage_path, dst_coverage_path)
     return result
 
 
@@ -73,7 +83,7 @@ class TestVersionDotPy:
             "poetry-plugin-version: Setting package dynamic version to __version__ "
             f"variable from {self.version_file}: 0.0.8" in result.stdout
         )
-        assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+        assert "Building test-custom-version (0.0.8)" in result.stdout
         wheel_path = testing_dir / "dist" / "test_custom_version-0.0.8-py3-none-any.whl"
         info = pkginfo.get_metadata(str(wheel_path))
         assert info and info.version == "0.0.8"
@@ -90,6 +100,8 @@ class TestPdmStyle(TestVersionDotPy):
 
 
 def test_custom_packages(tmp_path: Path) -> None:
+    if os.getenv("PPV_HOME_TMP"):
+        (tmp_path := Path.home() / "tmp2").mkdir()
     testing_dir = tmp_path / "testing_package"
     copy_assets("custom_packages", testing_dir)
     result = build_package(testing_dir=testing_dir)
@@ -101,7 +113,7 @@ def test_custom_packages(tmp_path: Path) -> None:
         "poetry-plugin-version: Setting package dynamic version to __version__ "
         "variable from __init__.py: 0.0.2" in result.stdout
     )
-    assert "Built test_custom_version-0.0.2-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.2)" in result.stdout
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.2-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
     assert info and info.version == "0.0.2"
@@ -178,7 +190,7 @@ def test_build_system(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("build_system", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
 
 
@@ -186,16 +198,16 @@ def test_poetry_v2(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
 
 
-def test_poetry_v2_api(tmp_path: Path, media_server: Path) -> None:
+def test_poetry_v2_api(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2_api", testing_dir)
     result = build_package(testing_dir, command="pip install -e .")
-    assert "Successfully installed test-custom-version-0.0.8" in result.stdout
     assert result.returncode == 0
+    assert "Successfully installed test-custom-version-0.0.8" in result.stdout
 
 
 def test_git_tag(tmp_path: Path) -> None:

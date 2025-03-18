@@ -1,8 +1,25 @@
 from __future__ import annotations
 
 import ast
+import contextlib
 from pathlib import Path
 from typing import cast
+
+with contextlib.suppress(ImportError):
+    from poetry.console.commands.build import BuildHandler
+
+    _origin_requires_isolated_build = BuildHandler._requires_isolated_build
+
+    def _requires_isolated_build(self: BuildHandler) -> bool:
+        if not _origin_requires_isolated_build(self):
+            return False
+        # patch poetry to avoid using isolated_builder for this plugin
+        return not any(
+            dep.name.replace("_", "-") == "poetry-plugin-version"
+            for dep in self.poetry.build_system_dependencies
+        )
+
+    BuildHandler._requires_isolated_build = _requires_isolated_build  # type:ignore
 
 
 def get_version_from_file(init_path: Path) -> str | None:
