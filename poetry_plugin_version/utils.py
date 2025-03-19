@@ -39,3 +39,21 @@ def get_version_from_file(init_path: Path) -> str | None:
                     continue
                 return cast(str, version)
     return None
+
+
+def find_version_file(package_name: str, filename: str, pyproject_path: Path) -> Path:
+    init_path = Path(package_name) / filename
+    if init_path.is_file():
+        return init_path
+    abs_init_path = pyproject_path.parent / init_path
+    if abs_init_path.is_file():
+        return abs_init_path
+    src_init = Path("src") / init_path
+    if src_init.is_file():
+        return src_init
+    abs_src_init = pyproject_path.parent / "src" / init_path
+    if abs_src_init.is_file():
+        return abs_src_init
+    raise FileNotFoundError(
+        f"{filename} file not found at {abs_init_path} cannot extract dynamic version"
+    )

@@ -74,6 +74,9 @@ build-backend = "poetry_plugin_version.api"
 
 ### Latest Changes
 
+### 0.5.4
+* ✨ Support auto get version file for src layout project
+
 ### 0.5.3
 * 🐛 Fix `pip install -e .` failed to get version when with poetry2.1+
 

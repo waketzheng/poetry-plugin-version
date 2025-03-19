@@ -49,6 +49,12 @@ def build_package(
     return result
 
 
+def display_version(
+    testing_dir: Path, command: str = "poetry version -s"
+) -> subprocess.CompletedProcess[str]:
+    return build_package(testing_dir, command=command)
+
+
 def test_defaults(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("no_packages", testing_dir)
@@ -156,6 +162,25 @@ def test_no_standard_dir(tmp_path: Path) -> None:
     assert result.returncode != 0
 
 
+def test_src_layout(tmp_path: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("src_layout", testing_dir)
+    result = build_package(testing_dir=testing_dir)
+    assert result.returncode == 0
+    assert (
+        "poetry-plugin-version: Using __init__.py file at "
+        "src/test_custom_version/__init__.py for dynamic version" in result.stdout
+    )
+    assert (
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
+        "variable from __init__.py: 0.0.8" in result.stdout
+    )
+    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.8" in result.stdout
+
+
 def test_multiple_packages(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("multiple_packages", testing_dir)
@@ -192,14 +217,20 @@ def test_build_system(tmp_path: Path) -> None:
     result = build_package(testing_dir=testing_dir)
     assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.8" in result.stdout
 
 
 def test_poetry_v2(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("poetry_v2", testing_dir)
     result = build_package(testing_dir=testing_dir)
-    assert "Building test-custom-version (0.0.8)" in result.stdout
     assert result.returncode == 0
+    assert "Building test-custom-version (0.0.8)" in result.stdout
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.8" in result.stdout
 
 
 def test_poetry_v2_api(tmp_path: Path) -> None:
@@ -208,6 +239,9 @@ def test_poetry_v2_api(tmp_path: Path) -> None:
     result = build_package(testing_dir, command="pip install -e .")
     assert result.returncode == 0
     assert "Successfully installed test-custom-version-0.0.8" in result.stdout
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.8" in result.stdout
 
 
 def test_git_tag(tmp_path: Path) -> None:
@@ -238,3 +272,6 @@ def test_git_tag(tmp_path: Path) -> None:
     wheel_path = testing_dir / "dist" / "test_custom_version-0.0.9-py3-none-any.whl"
     info = pkginfo.get_metadata(str(wheel_path))
     assert info and info.version == "0.0.9"
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.9" in result.stdout

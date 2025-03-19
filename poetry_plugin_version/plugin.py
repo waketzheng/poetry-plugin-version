@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from poetry.core.utils.helpers import module_name
 from poetry.plugins.plugin import Plugin
 
-from .utils import get_version_from_file
+from .utils import find_version_file, get_version_from_file
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import NoReturn
@@ -69,14 +69,10 @@ class VersionPlugin(Plugin):
                 package_name = packages[0]["include"]
             else:
                 package_name = module_name(poetry.package.name)
-            if not (init_path := Path(package_name) / filename).is_file() and (
-                not (init_path := poetry.file.path.parent / init_path).is_file()
-            ):
-                self.abort(
-                    f"<b>{name}</b>: {filename} file not found at "
-                    f"{init_path} cannot extract dynamic version",
-                    io=io,
-                )
+            try:
+                init_path = find_version_file(package_name, filename, poetry.file.path)
+            except FileNotFoundError as e:
+                self.abort(f"<b>{name}</b>: {e}", io=io)
         io.write_line(
             f"<b>{name}</b>: Using {filename} file at {init_path} for dynamic version"
         )
