@@ -10,7 +10,7 @@ from typing import Any, cast
 
 from poetry.core.pyproject.toml import PyProjectTOML
 
-from .utils import get_version_from_file
+from .utils import find_version_file, get_version_from_file
 
 
 class _Mode(Enum):
@@ -76,8 +76,8 @@ def _get_version(
     pyproject_path: Path, name: str, file: str = "__init__.py"
 ) -> str | None:
     package_name = name.replace("-", "_").replace(" ", "_")
-    init_path = pyproject_path.parent / package_name / file
-    return get_version_from_file(init_path)
+    version_path = find_version_file(package_name, file, pyproject_path.parent)
+    return get_version_from_file(version_path)
 
 
 def _get_and_apply_version(pyproject_path: Path | None = None) -> str | None:
