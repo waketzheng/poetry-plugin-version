@@ -181,6 +181,30 @@ def test_src_layout(tmp_path: Path) -> None:
     assert "0.0.8" in result.stdout
 
 
+def test_src_layout_api(tmp_path: Path) -> None:
+    testing_dir = tmp_path / "testing_package"
+    copy_assets("src_layout_api", testing_dir)
+    result = build_package(testing_dir=testing_dir)
+    assert result.returncode == 0
+    assert (
+        "poetry-plugin-version: Using __init__.py file at "
+        "src/test_custom_version/__init__.py for dynamic version" in result.stdout
+    )
+    assert (
+        "poetry-plugin-version: Setting package dynamic version to __version__ "
+        "variable from __init__.py: 0.0.8" in result.stdout
+    )
+    assert (
+        "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+        or "Building test-custom-version (0.0.8)" in result.stdout
+    )
+    result = build_package(testing_dir, command="pip install -e .")
+    assert result.returncode == 0
+    result = display_version(testing_dir)
+    assert result.returncode == 0
+    assert "0.0.8" in result.stdout
+
+
 def test_multiple_packages(tmp_path: Path) -> None:
     testing_dir = tmp_path / "testing_package"
     copy_assets("multiple_packages", testing_dir)

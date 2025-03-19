@@ -41,11 +41,18 @@ from .main import do_awesome_stuff, AwesomeClass
 __version__ = "0.2.3"
 ```
 
-And then change the `build_system` section in your `pyproject.toml`
+And then change the `build_system` section in your `pyproject.toml`,
+set version to be dynamic in `project` section and to be 0 in `tool.poetry` section.
 ```toml
 [build_system]
 requires = ["poetry-plugin-version"]
 build-backend = "poetry_plugin_version.api"
+
+[project]
+dynamic = ["version"]
+
+[tool.poetry]
+version = "0"
 ```
 
 Next, build your project. It will show an output like:
