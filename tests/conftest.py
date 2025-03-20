@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import contextlib
 import re
 import subprocess
 from pathlib import Path
@@ -15,10 +14,17 @@ def build_version_0_whl() -> None:
     whl_file.rename(whl_file.with_name(new_name))
 
 
-with contextlib.suppress(ImportError):
+try:
     import pytest
+except ImportError:
+    if __name__ != "__main__":
+        raise
+else:
 
-    pytest.fixture(scope="session", autouse=True)(build_version_0_whl)
+    @pytest.fixture(scope="session", autouse=True)
+    def prepare_wheel_file() -> None:
+        build_version_0_whl()
+
 
 if __name__ == "__main__":
     build_version_0_whl()
