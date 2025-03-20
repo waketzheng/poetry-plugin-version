@@ -5,10 +5,9 @@ from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from poetry.core.utils.helpers import module_name
 from poetry.plugins.plugin import Plugin
 
-from .utils import find_version_file, get_version_from_file
+from .utils import find_version_file, get_version_from_file, parse_package_name
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import NoReturn
@@ -58,17 +57,12 @@ class VersionPlugin(Plugin):
     ) -> None:
         init_path = Path(filename)
         if Path(init_path.name) == init_path or not init_path.is_file():
-            if packages := poetry.local_config.get("packages"):
-                if len(packages) != 1:
-                    self.abort(
-                        f"<b>{name}</b>: More than one package set, "
-                        "cannot extract dynamic version",
-                        io=io,
-                    )
-
-                package_name = packages[0]["include"]
-            else:
-                package_name = module_name(poetry.package.name)
+            try:
+                package_name = parse_package_name(
+                    poetry.package.name, poetry.local_config, poetry.pyproject.data
+                )
+            except ValueError as e:
+                self.abort(f"<b>{name}</b>: {e}", io=io)
             try:
                 init_path = find_version_file(package_name, filename, poetry.file.path)
             except FileNotFoundError as e:

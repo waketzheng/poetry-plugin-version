@@ -1,11 +1,12 @@
+#!/usr/bin/env python
+import contextlib
 import re
 import subprocess
 from pathlib import Path
 
-import pytest
-
 
 def build_version_0_whl() -> None:
+    # Build a whl file with version=0
     subprocess.check_call(["poetry", "build", "--clean", "--format", "wheel"])
     root_dir = Path(__file__).parent.resolve().parent
     dist_dir = root_dir / "dist"
@@ -14,7 +15,10 @@ def build_version_0_whl() -> None:
     whl_file.rename(whl_file.with_name(new_name))
 
 
-@pytest.fixture(scope="session", autouse=True)
-def prepare_wheel_file() -> None:
-    # Build a whl file with version=0
+with contextlib.suppress(ImportError):
+    import pytest
+
+    pytest.fixture(scope="session", autouse=True)(build_version_0_whl)
+
+if __name__ == "__main__":
     build_version_0_whl()

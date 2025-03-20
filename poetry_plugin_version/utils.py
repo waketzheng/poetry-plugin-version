@@ -3,7 +3,9 @@ from __future__ import annotations
 import ast
 import contextlib
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
+
+from poetry.core.utils.helpers import module_name
 
 with contextlib.suppress(ImportError):
     from poetry.console.commands.build import BuildHandler
@@ -57,3 +59,19 @@ def find_version_file(package_name: str, filename: str, pyproject_path: Path) ->
     raise FileNotFoundError(
         f"{filename} file not found at {abs_init_path} cannot extract dynamic version"
     )
+
+
+def parse_package_name(
+    name: str, poetry_config: dict[str, Any], pyproject_data: dict[str, Any]
+) -> str:
+    if (packages := poetry_config.get("packages")) or (
+        packages := pyproject_data.get("project", {}).get("packages", [])
+    ):
+        if len(packages) > 1:
+            raise ValueError(
+                "More than one package set, cannot extract dynamic version"
+            )
+        package_name = cast(str, packages[0]["include"])
+    else:
+        package_name = module_name(name)
+    return package_name

@@ -73,13 +73,23 @@ def test_defaults(tmp_path: Path) -> None:
     assert info and info.version == "0.0.1"
 
 
-class TestVersionDotPy:
+class AssetBase:
+    asset_dir: str
+
+    def prepare_project(self, base_dir: Path) -> Path:
+        if os.getenv("PPV_HOME_TMP"):
+            (base_dir := Path.home() / "tmp2").mkdir()
+        testing_dir = base_dir / "testing_package"
+        copy_assets(self.asset_dir, testing_dir)
+        return testing_dir
+
+
+class TestVersionDotPy(AssetBase):
     asset_dir = "version_dot_py"
     version_file = "version.py"
 
     def test_custom_version_file(self, tmp_path: Path) -> None:
-        testing_dir = tmp_path / "testing_package"
-        copy_assets(self.asset_dir, testing_dir)
+        testing_dir = self.prepare_project(tmp_path)
         result = build_package(testing_dir=testing_dir)
         assert (
             f"poetry-plugin-version: Using {self.version_file} file at "
@@ -105,24 +115,30 @@ class TestPdmStyle(TestVersionDotPy):
     version_file = "test_custom_version/version.py"
 
 
-def test_custom_packages(tmp_path: Path) -> None:
-    if os.getenv("PPV_HOME_TMP"):
-        (tmp_path := Path.home() / "tmp2").mkdir()
-    testing_dir = tmp_path / "testing_package"
-    copy_assets("custom_packages", testing_dir)
-    result = build_package(testing_dir=testing_dir)
-    assert (
-        "poetry-plugin-version: Using __init__.py file at custom_package/__init__.py "
-        "for dynamic version" in result.stdout
-    )
-    assert (
-        "poetry-plugin-version: Setting package dynamic version to __version__ "
-        "variable from __init__.py: 0.0.2" in result.stdout
-    )
-    assert "Building test-custom-version (0.0.2)" in result.stdout
-    wheel_path = testing_dir / "dist" / "test_custom_version-0.0.2-py3-none-any.whl"
-    info = pkginfo.get_metadata(str(wheel_path))
-    assert info and info.version == "0.0.2"
+class TestCustomPackages(AssetBase):
+    asset_dir = "custom_packages"
+
+    def test_custom_packages(self, tmp_path: Path) -> None:
+        testing_dir = self.prepare_project(tmp_path)
+        result = build_package(testing_dir=testing_dir)
+        assert (
+            "poetry-plugin-version: Using __init__.py file at custom_package/__init__.py "
+            "for dynamic version" in result.stdout
+        )
+        assert (
+            "poetry-plugin-version: Setting package dynamic version to __version__ "
+            "variable from __init__.py: 0.0.2" in result.stdout
+        )
+        assert "Building test-custom-version (0.0.2)" in result.stdout
+        wheel_path = testing_dir / "dist" / "test_custom_version-0.0.2-py3-none-any.whl"
+        info = pkginfo.get_metadata(str(wheel_path))
+        assert info and info.version == "0.0.2"
+        result = build_package(testing_dir, command="pip install -e .")
+        assert result.returncode == 0
+
+
+class TestCustomPackagesV2:
+    asset_dir = "custom_packages_v2"
 
 
 def test_variations(tmp_path: Path) -> None:
@@ -162,47 +178,38 @@ def test_no_standard_dir(tmp_path: Path) -> None:
     assert result.returncode != 0
 
 
-def test_src_layout(tmp_path: Path) -> None:
-    testing_dir = tmp_path / "testing_package"
-    copy_assets("src_layout", testing_dir)
-    result = build_package(testing_dir=testing_dir)
-    assert result.returncode == 0
-    assert (
-        "poetry-plugin-version: Using __init__.py file at "
-        "src/test_custom_version/__init__.py for dynamic version" in result.stdout
-    )
-    assert (
-        "poetry-plugin-version: Setting package dynamic version to __version__ "
-        "variable from __init__.py: 0.0.8" in result.stdout
-    )
-    assert "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
-    result = display_version(testing_dir)
-    assert result.returncode == 0
-    assert "0.0.8" in result.stdout
+class TestSrcLayout(AssetBase):
+    asset_dir = "src_layout"
+
+    def test_custom_packages(self, tmp_path: Path) -> None:
+        testing_dir = self.prepare_project(tmp_path)
+        result = build_package(testing_dir=testing_dir)
+        assert result.returncode == 0
+        assert (
+            "poetry-plugin-version: Using __init__.py file at "
+            "src/test_custom_version/__init__.py for dynamic version" in result.stdout
+        )
+        assert (
+            "poetry-plugin-version: Setting package dynamic version to __version__ "
+            "variable from __init__.py: 0.0.8" in result.stdout
+        )
+        assert (
+            "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
+            or "Building test-custom-version (0.0.8)" in result.stdout
+        )
+        result = build_package(testing_dir, command="pip install -e .")
+        assert result.returncode == 0
+        result = display_version(testing_dir)
+        assert result.returncode == 0
+        assert "0.0.8" in result.stdout
 
 
-def test_src_layout_api(tmp_path: Path) -> None:
-    testing_dir = tmp_path / "testing_package"
-    copy_assets("src_layout_api", testing_dir)
-    result = build_package(testing_dir=testing_dir)
-    assert result.returncode == 0
-    assert (
-        "poetry-plugin-version: Using __init__.py file at "
-        "src/test_custom_version/__init__.py for dynamic version" in result.stdout
-    )
-    assert (
-        "poetry-plugin-version: Setting package dynamic version to __version__ "
-        "variable from __init__.py: 0.0.8" in result.stdout
-    )
-    assert (
-        "Built test_custom_version-0.0.8-py3-none-any.whl" in result.stdout
-        or "Building test-custom-version (0.0.8)" in result.stdout
-    )
-    result = build_package(testing_dir, command="pip install -e .")
-    assert result.returncode == 0
-    result = display_version(testing_dir)
-    assert result.returncode == 0
-    assert "0.0.8" in result.stdout
+class TestSrcLayoutApi(AssetBase):
+    asset_dir = "src_layout_api"
+
+
+class TestSrcLayoutCustomPackages(AssetBase):
+    asset_dir = "src_layout_custom_packages"
 
 
 def test_multiple_packages(tmp_path: Path) -> None:

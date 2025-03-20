@@ -1,0 +1,16 @@
+[project]
+name = "test-custom-version"
+description = ""
+authors = []
+readme = "README.md"
+dynamic = ["version"]
+dependencies = []
+requires-python = ">=3.9"
+
+[tool.poetry]
+version =  "0"
+packages = [{include = "custom_package"}]
+
+[build-system]
+requires = ["poetry-plugin-version@../../.."]
+build-backend = "poetry_plugin_version.api"
