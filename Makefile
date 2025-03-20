@@ -9,6 +9,7 @@ help:
 	@echo  "    test    Runs all tests"
 	@echo  "    style   Auto-formats the code"
 	@echo  "    lint    Auto-formats the code and check type hints"
+	@echo  "    venv    Create virtual environment"
 
 up:
 	poetry update --verbose
@@ -16,31 +17,39 @@ up:
 deps:
 ifeq ($(wildcard poetry.lock),)
 	poetry lock --verbose
-	poetry install --verbose
+	poetry install --all-extras --all-groups --verbose
 else
-	poetry install
+	poetry install --all-extras --all-groups
+endif
+ifeq ($(shell poetry run --no-plugins which ruff),)
+	@echo 'Command "ruff" not found! You may need to install it by `pipx install ruff`'
 endif
 
 _check:
 	poetry run ./scripts/lint.sh
-check: deps _build _check
+check: deps build _check
 
 _lint:
 	poetry run fast lint
-lint: deps _build _lint
+lint: deps build _lint
 
-_test:
+test:
+ifeq ($(shell poetry run --no-plugins which coverage),)
+	poetry install --with=test
+endif
 	poetry run ./scripts/test.sh
-test: deps _test
 
 _style:
 	poetry run ./scripts/format.sh
-style: deps _style
 
-_build:
-	rm -fR dist/
-	poetry build
-build: deps _build
+style:
+ifeq ($(shell poetry run --no-plugins which ruff),)
+	@echo 'Command "ruff" not found! You may need to install it by `pipx install ruff`'
+endif
+	$(MAKE) _style
+
+build:
+	poetry build --clean
 
 # Usage::
 #   make venv version=3.12

@@ -55,6 +55,7 @@ jobs:
         run: python -m poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - name: Install Dependencies
         run: python -m poetry install
+      - uses: astral-sh/ruff-action@v3
       - name: Lint
         run: python -m poetry run bash scripts/lint.sh
       - name: Test
