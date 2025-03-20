@@ -81,6 +81,9 @@ build-backend = "poetry_plugin_version.api"
 
 ### Latest Changes
 
+### 0.5.5
+* 🐛 Fix `pip install -e .` failed with custom packages section
+
 ### 0.5.4
 * ✨ Support auto get version file for src layout project
 
