@@ -1,6 +1,6 @@
 [project]
 name = "poetry-plugin-version"
-version = "0.5.4"
+version = "0.5.5"
 description = "Poetry plugin for dynamically extracting the package version from a __version__ variable or a Git tag."
 authors = [
     { name="Waket Zheng", email="waketzheng@gmail.com" },  # For version>=0.2.2 which published as `poetry-plugin-version`
